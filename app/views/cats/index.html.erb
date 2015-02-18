@@ -1,12 +1,13 @@
 <h1>Listing cats</h1>
 
-<% if @cat_of_the_month %>
-  <h2>Cat with more followers last month</h2>
-  <p>
-    <%= link_to @cat_of_the_month.name, cat_path(@cat_of_the_month) %>
-  </p>
-<% end %>
+  <% if @cat_of_the_month %>
+    <h2>Cat with more followers last month</h2>
+    <p>
+      <%= link_to @cat_of_the_month.name, cat_path(@cat_of_the_month) %>
+    </p>
+  <% end %>
 
+<% cache do %>
 <table class="table table-striped">
   <thead>
     <tr>
@@ -29,5 +30,5 @@
     <% end %>
   </tbody>
 </table>
-
+<% end %>  
 <%= paginate @cats %>

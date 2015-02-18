@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   root 'cats#index'
-
-  resources :cats, only: [:index, :show, :edit, :update]
+  get '/login' => 'cats#login'
+  post '/authenticate' => 'cats#authenticate'
+  resources :cats
 end

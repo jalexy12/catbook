@@ -1,8 +1,11 @@
 class Cat < ActiveRecord::Base
   validates :name, presence: true, length: { in: 2..255 }
-
+  has_secure_password
   scope :visible, -> { where(visible: true) }
   scope :hidden,  -> { where(visble: false) }
+  validates :email, presence: true, format: { with: /[a-zA-Z0-9.+-_]+@\w+.\w+/, message: "invalid email format" }
+  validates :password_digest, presence: true
+
 
   # More info
   # http://guides.rubyonrails.org/association_basics.html
@@ -14,4 +17,10 @@ class Cat < ActiveRecord::Base
 
   has_many :followers,    -> { visible }, through: :follower_relations, source: :followed
   has_many :followed_by,  -> { visible }, through: :followed_relations, source: :cat
+
+  def self.cat_info
+    visible.select(:id, :name, :birthday)
+  end
+
+ 
 end

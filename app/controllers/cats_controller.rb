@@ -1,16 +1,33 @@
+require 'pry'
+
 class CatsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   before_action :load_cat_of_the_month, only: :index
-  before_action :load_cat, except: :index
+  before_action :load_cat, except: [ :index, :new, :create, :login ]
 
   def index
     page  = params[:page].to_i || 1
 
     # page scope is provided by kamikari gem
     # https://github.com/amatsuda/kaminari/blob/master/lib/kaminari/models/active_record_model_extension.rb#L13
-    @cats = Cat.visible.select(:id, :name, :birthday).page(page)
+   
+      @cats = Cat.cat_info.page(page)
+
   end
+  def authenticate
+    cat_login = params.require(:cat).permit(:email, :password)
+    cat = Cat.find_by(email: cat_login[:email]).try(:authenticate, cat_login[:password])
+  end
+
+  def new
+    @cat = Cat.new
+  end
+
+  def login
+    @cat = Cat.new
+  end
+
 
   def show
   end
@@ -30,6 +47,18 @@ class CatsController < ApplicationController
     end
   end
 
+  def create
+      @new_cat_info = params.require(:cat).permit(:name, :email, :password)
+      @cat = Cat.new(@new_cat_info)
+      if @cat.save
+        redirect_to (login_path)
+      else
+        render 'new'
+    end
+
+  end
+
+
   private
 
   def load_cat
@@ -42,9 +71,15 @@ class CatsController < ApplicationController
     { visible: true }.merge(params[:cat])
   end
 
+
+
   # Do you think this is a good place to put this logic?
   # Where would you move it?
   def load_cat_of_the_month
+      month = DateTime.now.last_month.strftime('%Y-%B')
+    @cats = Rails.cache.fetch("cat-of-the-month/#{month}", expires_in: 1.month) do
+
+  
     last_month_follower_relation = FollowerRelation.where("EXTRACT(MONTH FROM created_at) = ? AND EXTRACT(YEAR FROM created_at) = ?", 1.month.ago.month, 1.month.ago.year)
 
     # First alternative
@@ -66,5 +101,6 @@ class CatsController < ApplicationController
     # # http://apidock.com/rails/Object/try
     #
     # @cat_of_the_month = Cat.find(cat_of_month_id) if cat_of_month_id
+  end
   end
 end

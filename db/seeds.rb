@@ -9,9 +9,7 @@ require 'faker'
 #
 
 # Is this the best place to put this kind of seeding?
-case Rails.env
-when "development"
+
   1000.times do |i|
     Cat.create!(name: Faker::Name.name, birthday: Faker::Date.birthday)
   end
-end
