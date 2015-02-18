@@ -4,7 +4,7 @@ class CatsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   before_action :load_cat_of_the_month, only: :index
-  before_action :load_cat, except: [ :index, :new, :create, :login ]
+  before_action :load_cat, except: [ :index, :new, :create, :login, :authenticate ]
 
   def index
     page  = params[:page].to_i || 1
@@ -18,6 +18,14 @@ class CatsController < ApplicationController
   def authenticate
     cat_login = params.require(:cat).permit(:email, :password)
     cat = Cat.find_by(email: cat_login[:email]).try(:authenticate, cat_login[:password])
+    
+
+    if !cat
+      render ('login')
+    else
+      render text: 'Hi'
+    end
+
   end
 
   def new
