@@ -5,8 +5,10 @@ class CatsController < ApplicationController
 
   before_action :load_cat_of_the_month, only: :index
   before_action :load_cat, only: [ :show, :edit, :update]
-  before_action :retrieve_cat_user, only: [:index, :show, :edit, :edit_cat_user, :update, :destroy]
-  before_action :redirect_logged_in, only: [:new, :create, :login, :authenticate ]
+  # before_action :retrieve_cat_user, only: [:index, :show, :edit, :edit_cat_user, :update, :destroy]
+  # before_action :redirect_logged_in, only: [:new, :create, :login, :authenticate ]
+  before_action :authenticate_cat!, except: [:new, :create, :login, :authenticate]
+  before_action :cant_edit_other_cats, only: [:edit, :update]
 
   def index
     page  = params[:page].to_i || 1
@@ -17,6 +19,12 @@ class CatsController < ApplicationController
       @cats = Cat.cat_info.page(page)
 
   end
+
+  def random
+    cat = Cat.select(:id, :name, :email, :sign_in_count, :breed).order('RANDOM()').first
+    render(json: cat)
+  end
+  
   def authenticate
     cat_login = params.require(:cat).permit(:email, :password)
     cat = Cat.find_by(email: cat_login[:email]).try(:authenticate, cat_login[:password])
@@ -119,7 +127,7 @@ class CatsController < ApplicationController
       # # I just googled "Order by group by count" to find this solution
       # cat_of_month_id = last_month_follower_relation.
       #   group(:followed_cat_id).
-      #   select("followed_cat_id, COUNT(*) as followers_count").
+      #   sele  ct("followed_cat_id, COUNT(*) as followers_count").
       #   order("followers_count DESC").
       #   limit(1).first.try(:followed_cat_id)
       #
@@ -130,17 +138,23 @@ class CatsController < ApplicationController
   end
 
   def redirect_logged_in
-    @cat_user = Cat.find_by(id: session[:cat_id])
-    if @cat_user.present?
+    current_cat = Cat.find_by(id: session[:cat_id])
+    if current_cat.present?
       redirect_to(cats_path)
     end
 
   end
 
-  def retrieve_cat_user
-    @cat_user = Cat.find_by(id: session[:cat_id])
+  def cant_edit_other_cats
+    unless params[:id].to_i == current_cat
+      redirect_to(edit_cat_path)
+    end
+  end
 
-    if @cat_user.nil?
+  def retrieve_cat_user
+    current_cat = Cat.find_by(id: session[:cat_id])
+
+    if current_cat.nil?
       redirect_to(login_path)
     end
   end

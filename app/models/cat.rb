@@ -1,10 +1,13 @@
 class Cat < ActiveRecord::Base
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable
   validates :name, presence: true, length: { in: 2..255 }
-  has_secure_password
+
   scope :visible, -> { where(visible: true) }
   scope :hidden,  -> { where(visble: false) }
   validates :email, presence: true, format: { with: /[a-zA-Z0-9.+-_]+@\w+.\w+/, message: "invalid email format" }
-  validates :password_digest, presence: true
 
 
   # More info
@@ -21,6 +24,7 @@ class Cat < ActiveRecord::Base
   def self.cat_info
     visible.select(:id, :name, :birthday)
   end
+
 
  
 end

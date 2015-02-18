@@ -1,8 +1,7 @@
-<% if @cat_user.present? %>
-
+<% if current_cat.present? %>
 
 <header>
-  <h3><%= @cat_user.name %></h3>
+  <h3><%= current_cat.name %></h3>
 </header>
 
 <% end %>
