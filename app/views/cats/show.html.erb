@@ -4,7 +4,7 @@
 
 <dl class="dl-horizontal">
   <dt>Birthday</dt>
-  <dd><%= localize_date @cat.birthday %></dd>
+  <dd><%= @cat.localized_birthday %></dd>
 </dl>
 
 <%# Don't you see here some repetion? %>
@@ -26,3 +26,6 @@
 </ul>
 
 <%= link_to "Back", cats_path %>
+<% if @cat.id == session[:cat_id] %>
+	<%= link_to "Edit", edit_cat_path(@cat.id) %>
+<% end %>
